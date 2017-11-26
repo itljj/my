@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- 解决防盗链 -->
+	<meta name="referrer" content="never">
+	<title>豆瓣一刻</title>
+	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="./public/css/main-b61fdb1a47.css">
+	
+	<script src="./libs/angular-449db80e31.min.js"></script>
+
+</head>
+<body>
+<div id="Yike">
+	<!--<p>{{message}}</p>-->
+	<div class="viewport">
+		<!-- 侧边导航 -->
+		<!--v-bind 是单向数据绑定（内存js改变影响页面）-->
+		<div :class="{navs: true,collapse: collapsed}">
+			<dl>
+				<dt class="login">
+				<div class="avatar">
+					<img src="./public/images/avatar-8844dbfc4d.png" alt="">
+				</div>
+				<span>登录</span>
+				</dt>
+				<!--$index == key
+				:属性名="表达式"
+				-->
+				<dd :class="{active: index==key}" v-for="(nav,key) in navs" @click="toggle">
+					<todo-item  :todo="nav"></todo-item>
+				</dd>
+			</dl>
+			<div class="extra">
+				<a href="javascript:;" class="icon-image">夜晚</a>
+				<a href="javascript:;" class="icon-download">离线</a>
+			</div>
+		</div>
+		<div class="container">
+			<!-- 头部
+			一个样式：返回字符串
+			多个样式：返回对象（样式：key；值：true/false）
+			-->
+			<div :class="{header: true,collapse: collapsed}">
+				<a href="javascript:;" @click="toggle" class="menu icon-menu"></a>
+				<h2>{{title}}</h2>
+				<a href="javascript:;" class="search icon-search"></a>
+			</div>
+			<!-- 主体 -->
+			<div :class="{body: true,collapse: collapsed}">
+				<img src="./public/images/loading-50c5e3e79b.gif" v-show="!loaded" class="loading" alt="">
+				<router-view :loaded="loaded" @my="update" :date="date" v-show="loaded">
+
+				</router-view>
+			</div>
+		</div>
+	</div>
+</div>
+<template id="today">
+	<!--只能有一个根节点-->
+	<div class="item">
+		<!-- 日期分类 -->
+		<div class="mark" v-show="loaded">{{date}}</div>
+		<ul class="posts large">
+			<!-- 文章 -->
+			<li v-for="post in posts">
+				<span href="javascript:;" v-if="post.column.name" class="tag">{{post.column.name}}</span>
+				<div class="cont">
+					<h3>{{post.title}}</h3>
+					<div class="brief">
+						<!-- 10001 和 10002 -->
+						<!-- 只有当display_style 10001 有类名 -->
+						<p :class="{only: post.display_style == 10001}" v-if="post.display_style != 10003">
+							{{post.abstract}}
+						</p>
+						<!-- 10002 -->
+						<div class="thumb" v-if="post.display_style == 10002">
+							<img :src="post.thumbs[0].small.url" alt="">
+						</div>
+						<!-- 10003 -->
+						<div class="gallery" v-if="post.display_style == 10003">
+							<img :src="post.thumbs[0].small.url" alt="">
+						</div>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+</template>
+
+<template id="older">
+	<div class="item">
+		<!-- 日期分类 -->
+		<div class="mark" v-show="loaded">{{date}}</div>
+		<ul class="posts">
+			<!-- 文章 -->
+			<li v-for="post in posts">
+				<span href="javascript:;" v-if="post.column.name" class="tag">{{post.column.name}}</span>
+				<div class="cont">
+					<h3>{{post.title}}</h3>
+					<div class="brief">
+						<!-- 10001和10002 -->
+						<p :class="{only: post.display_style == 10001}" v-if="post.display_style != 10003">
+							{{post.abstract}}
+						</p>
+						<!-- 10003 -->
+						<div class="gallery" v-if="post.display_style == 10003">
+							<div class="img-box" v-for="thumbs in post.thumbs">
+								<img :src="thumbs.small.url" alt="">
+							</div>
+						</div>
+						<!-- 10002 -->
+						<div class="thumb" v-if="post.display_style == 10002">
+							<img :src="post.thumbs[0].small.url" alt="">
+						</div>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+</template>
+<template id="author">
+	<dl class="author">
+		<dt>本周推荐</dt>
+		<dd v-for="author_rec in authors_rec">
+			<div class="avatar">
+				<img :src="author_rec.avatar" alt="">
+			</div>
+			<div class="info">
+				<h5>{{author_rec.name}}</h5>
+				<p>{{author_rec.editor_notes}}</p>
+			</div>
+		</dd>
+		<dt>热门作者</dt>
+		<dd v-for="author_hot in authors_hot">
+			<div class="avatar">
+				<img :src="author_hot.avatar" alt="">
+			</div>
+			<div class="info">
+				<h5>{{author_hot.name}}</h5>
+				<p>{{author_hot.editor_notes}}</p>
+			</div>
+		</dd>
+	</dl>
+</template>
+<template id="category">
+	<ul class="category">
+		<li v-for="column in columns">
+			<a href="javascript:;">
+				<img :src="column.icon" alt="">
+				<h5>{{column.name}}</h5>
+				<p>{{column.description}}</p>
+			</a>
+		</li>
+	</ul>
+</template>
+<template id="favourite">
+	<div class="item">
+		<!-- 日期分类 -->
+		<div class="mark">喜欢（2）</div>
+		<ul class="posts">
+			<!-- 文章 -->
+			<li>
+				<span href="javascript:;" class="tag">去远方</span>
+				<div class="cont">
+					<h3>朝圣山南扎央宗--探索藏文化之源</h3>
+					<div class="brief">
+						<div class="gallery">
+							<div class="img-box">
+								<img src="./uploads/post_3-0beda905da.png" alt="">
+							</div>
+							<div class="img-box">
+								<img src="./uploads/post_4-cd59d53b8b.png" alt="">
+							</div>
+							<div class="img-box">
+								<img src="./uploads/post_5-be8895201a.png" alt="">
+							</div>
+						</div>
+					</div>
+				</div>
+			</li>
+			<li>
+				<span href="javascript:;" class="tag">去远方</span>
+				<div class="cont">
+					<h3>朝圣山南扎央宗--探索藏文化之源探索藏文化之源探索藏文化之源</h3>
+					<div class="brief">
+						<p>那里有个很窄的洞，钻进去曾是莲花生大师修行的地方，在藏民心中钻洞是为了洗清</p>
+						<div class="thumb">
+							<img src="./uploads/post_1-0c815f7c1e.png" alt="">
+						</div>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+</template>
+<template id="settings">
+	<div class="settings">
+		<ul>
+			<li>字体大小</li>
+			<li>WiFi下自动离线</li>
+		</ul>
+		<ul>
+			<li>绑定微博账号</li>
+		</ul>
+		<ul>
+			<li>清理缓存</li>
+		</ul>
+		<ul>
+			<li>意见反馈</li>
+			<li>关于</li>
+		</ul>
+	</div>
+</template>
+<script src="./scripts/app-36bc6c24f2.js"></script>
+</body>
+</html>
